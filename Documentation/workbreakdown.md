@@ -3,9 +3,9 @@
  - [x] Entwurf des Datenbankschemas
  - [x] Auswahl einer geeigneten Datenbanktechnologie
  - [ ] Definition der Anforderungen und Funktionalitäten der Anwendung
-        - [ ] Sammlung der benötigten Methoden
-        - [ ] Analys der Arten der Auszutauschenden Daten
-        - [ ] Erstellen der UML Diagramme 
+    - [ ] Sammlung der benötigten Methoden
+    - [ ] Analys der Arten der Auszutauschenden Daten
+    - [ ] Erstellen der UML Diagramme 
 
 #### Implementierungsphase
  - [ ] Erstellung der Datenbankverbindung mit dem Singleton-Pattern
