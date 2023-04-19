@@ -1,5 +1,5 @@
      +---------------------+    +---------------------+
-    |   Database Model    |    |   JavaFX View Model  |
+    |   Database Model    |------|   JavaFX View Model  |
     +---------------------+    +---------------------+
                |                          |
                |                          |
