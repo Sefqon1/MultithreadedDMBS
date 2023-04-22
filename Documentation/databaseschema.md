@@ -1,42 +1,38 @@
 ### Teacher
-- id INTEGER PRIMARY KEY
+- id INTEGER PRIMARY KEY AUTOINCREMENT
 - name TEXT
 - subject TEXT
 
 ### Student
-- id INTEGER PRIMARY KEY
+- id INTEGER PRIMARY KEY AUTOINCREMENT
 - name TEXT
-- class TEXT
+- class INTEGER
 
 ### Classes
-- id INTEGER PRIMARY KEY
+- id INTEGER PRIMARY KEY AUTOINCREMENT
 - teacher_id INTEGER
-- student_id INTEGER
 - FOREIGN KEY (teacher_id) REFERENCES Teacher(id)
-- FOREIGN KEY (student_id) REFERENCES Student(id)
 
 
 ![image](./edudb.jpg)
 
 ---
 ``` SQL
-CREATE TABLE Lehrer (
-  id INTEGER PRIMARY KEY,
+CREATE TABLE Teacher (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT,
-  fach TEXT
+  subject TEXT
 );
 
-CREATE TABLE Schueler (
-  id INTEGER PRIMARY KEY,
+CREATE TABLE Student (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT,
-  klasse TEXT
+  class INTEGER
 );
 
-CREATE TABLE Klassen (
-  id INTEGER PRIMARY KEY,
-  lehrer_id INTEGER,
-  schueler_id INTEGER,
-  FOREIGN KEY (lehrer_id) REFERENCES Lehrer(id),
-  FOREIGN KEY (schueler_id) REFERENCES Schueler(id)
+CREATE TABLE Classes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  teacher_id INTEGER,
+  FOREIGN KEY (teacher_id) REFERENCES Teacher(id)
 );
 ```
