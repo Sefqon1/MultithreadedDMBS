@@ -86,26 +86,3 @@ public class DatabaseConnectionPool {
     }
 }
 
-/*
-The condition for resetting the connection pool is flawed.
-If there are more expired connections than available connections in the pool, the pool is reset and all connections are closed.
-This will cause any threads waiting for a connection to throw an exception since the connection pool is now empty.
-A better approach would be to close only the expired connections and then try to add new connections to the pool.
- */
-
-       /* // Wenn es mehr abgelaufene Verbindungen als verfügbare Verbindungen gibt, wird der Verbindungspool zurückgesetzt
-        if (expiredConnections.size() >= MAX_POOL_SIZE) {
-            connectionPool.clear();
-            populateConnectionPool(connectionPool, dbConnection);
-            expiredConnections.clear();
-        } else {
-            // Andernfalls werden alle abgelaufenen Verbindungen aus der Verbindungsliste entfernt und geschlossen
-            for (Connection connection : expiredConnections) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                connectionPool.remove(connection);
-            }
-        } */
