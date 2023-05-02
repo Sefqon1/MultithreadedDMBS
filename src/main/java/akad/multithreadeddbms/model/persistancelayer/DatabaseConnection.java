@@ -36,10 +36,10 @@ public class DatabaseConnection {
     }
 
     // Diese Methode schließt die Verbindung zur Datenbank
-    public void disconnectDatabaseConnection() {
+    public void disconnectDatabaseConnection(Connection conn) {
         try {
             // Hier wird die Verbindung zur Datenbank geschlossen
-            connection.close();
+            conn.close();
         } catch (SQLException ex) {
             // Hier wird eine RuntimeException ausgelöst, wenn die Verbindung nicht geschlossen werden kann
             throw new RuntimeException(ex);

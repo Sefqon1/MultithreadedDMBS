@@ -14,6 +14,7 @@
 	│       │   └── com/
 	│       │       └── example/
 	│       │           └── databasemanagementproject/
+	| 		|               |
 	│       │               ├── HelloApplication.class  # Sample Java class
 	│       │               └── HelloController.class   # Sample Java class
 	│       └── generated-sources/      # Generated source code directory

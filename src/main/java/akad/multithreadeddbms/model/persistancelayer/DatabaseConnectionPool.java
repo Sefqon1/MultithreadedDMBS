@@ -1,8 +1,10 @@
 package akad.multithreadeddbms.model.persistancelayer;
+
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class DatabaseConnectionPool {
     private static final int MAX_POOL_SIZE = 10;
@@ -11,54 +13,50 @@ public class DatabaseConnectionPool {
     private List<Connection> connectionPool; // Liste der Verbindungen zur Datenbank
     private ScheduledExecutorService executorService; // ScheduledExecutorService für die periodische Überprüfung von Verbindungen
 
-    public DatabaseConnectionPool() throws SQLException {
+    //Nimmt DBConnection als Argument für Dependency Injection
+    public DatabaseConnectionPool(DatabaseConnection dbConnection) throws SQLException {
+
         connectionPool = new ArrayList<>(MAX_POOL_SIZE);
         // Hier werden die Verbindungen zur Datenbank erstellt und der Verbindungsliste hinzugefügt
-        populateConnectionPool(connectionPool);
+        populateConnectionPool(connectionPool, dbConnection);
         executorService = Executors.newScheduledThreadPool(MAX_POOL_SIZE);
-        executorService.scheduleAtFixedRate(this::validateConnections , DELAY, TIMEOUT);
+        executorService.scheduleAtFixedRate(() -> validateConnections(dbConnection), DELAY, TIMEOUT, TimeUnit.MILLISECONDS);
         // Hier wird die periodische Überprüfung von Verbindungen gestartet
     }
 
-    private void populateConnectionPool(List<Connection> connectionPool){
+    private synchronized void populateConnectionPool(List<Connection> connectionPool, DatabaseConnection dbconnection){
         for (int i = 0; i < MAX_POOL_SIZE; i++) {
-            try {
-                // Hier wird eine neue Verbindung zur Datenbank erstellt und der Verbindungsliste hinzugefügt
-                this.connectionPool.add(DatabaseConnection.getDatabaseConnection());
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            // Hier wird eine neue Verbindung zur Datenbank erstellt und der Verbindungsliste hinzugefügt
+            connectionPool.add(dbconnection.getDatabaseConnection());
         }
     }
 
-    private void validateConnections() {
-        List<Connection> expiredConnections = new ArrayList<>();
+    private void validateConnections(DatabaseConnection dbConnection) {
         // Hier werden alle Verbindungen in der Verbindungsliste überprüft
-        for (Connection connection : connectionPool) {
-            try {
-                // Wenn die Verbindung geschlossen ist, wird sie der Liste abgelaufener Verbindungen hinzugefügt
-                if (connection.isClosed()) {
-                    expiredConnections.add(connection);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        // Wenn es mehr abgelaufene Verbindungen als verfügbare Verbindungen gibt, wird der Verbindungspool zurückgesetzt
-        if (expiredConnections.size() >= MAX_POOL_SIZE) {
-            connectionPool.clear();
-            populateConnectionPool(connectionPool);
-            expiredConnections.clear();
-        } else {
-            // Andernfalls werden alle abgelaufenen Verbindungen aus der Verbindungsliste entfernt und geschlossen
-            for (Connection connection : expiredConnections) {
+            for (Connection connection : connectionPool) {
                 try {
-                    connection.close();
+                    // Wenn die Verbindung geschlossen ist, wird sie der Liste abgelaufener Verbindungen hinzugefügt
+                    if (connection.isClosed() || !connectionHealthCheck(connection)) {
+                        connection.close();
+                        connectionPool.remove(connection);
+                        if (connectionPool.size() < MAX_POOL_SIZE) {
+                            connectionPool.add(dbConnection.getDatabaseConnection());
+                        }
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-                connectionPool.remove(connection);
             }
+        }
+
+    private Boolean connectionHealthCheck(Connection connection) {
+
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT 1");
+            return true;
+        } catch (SQLException e) {
+            return false;
         }
     }
 
@@ -74,7 +72,7 @@ public class DatabaseConnectionPool {
                 throw new SQLException(e);
             }
         }
-        // Hier wird die letzte Verbindung aus der Verbindungsliste entfernt und zurückgegeben
+        // Hier wird die letzte Verbindung aus der Verbindungsliste entfernt und ausgegeben
         return connectionPool.remove(connectionPool.size() - 1);
     }
 
@@ -89,19 +87,25 @@ public class DatabaseConnectionPool {
 }
 
 /*
-To Do:
-
-    Überprüfen, ob die Konstanten DELAY und TIMEOUT geeignete Werte haben. Die aktuellen Werte sind 6000 Millisekunden oder 6 Sekunden. Diese Werte könnten möglicherweise je nach Anwendung angepasst werden.
-
-    Überprüfen, ob die Konstante MAX_POOL_SIZE eine geeignete Größe für die Anzahl der Verbindungen zum Datenbankserver hat. Die aktuelle Größe beträgt 10. Möglicherweise müssen Sie diese Anzahl basierend auf der Anwendung und der Datenbankserver-Verfügbarkeit anpassen.
-
-    Überprüfen, ob der ScheduledExecutorService ordnungsgemäß verwendet wird und ob die Implementierung der validateConnections()-Methode korrekt ist. Die Methode scheint derzeit Verbindungen zu entfernen, die bereits geschlossen sind, anstatt Verbindungen zu schließen, die seit dem letzten Validierungszeitraum nicht verwendet wurden.
-
-    Überprüfen Sie, ob der populateConnectionPool()-Methode möglicherweise eine Ausnahme auslöst, die die Verbindungsliste nicht vollständig bevölkert. Sie sollten überlegen, wie Sie damit umgehen können, wenn nicht alle Verbindungen erfolgreich erstellt werden können.
-
-    Überprüfen Sie, ob die getConnectionFromPool()-Methode ordnungsgemäß blockiert, wenn keine Verbindungen verfügbar sind, und ob sie ordnungsgemäß eine Verbindung aus dem Pool zurückgibt. Sie sollten sicherstellen, dass alle Threads, die auf eine Verbindung warten, ordnungsgemäß benachrichtigt werden.
-
-    Überprüfen Sie, ob die releaseConnection()-Methode ordnungsgemäß funktioniert und ob sie alle Threads benachrichtigt, die auf eine Verbindung warten. Sie sollten auch sicherstellen, dass freigegebene Verbindungen ordnungsgemäß wieder in den Pool aufgenommen werden.
-
-    Überprüfen Sie, ob alle Ausnahmen in der Implementierung ordnungsgemäß abgefangen und behandelt werden.
+The condition for resetting the connection pool is flawed.
+If there are more expired connections than available connections in the pool, the pool is reset and all connections are closed.
+This will cause any threads waiting for a connection to throw an exception since the connection pool is now empty.
+A better approach would be to close only the expired connections and then try to add new connections to the pool.
  */
+
+       /* // Wenn es mehr abgelaufene Verbindungen als verfügbare Verbindungen gibt, wird der Verbindungspool zurückgesetzt
+        if (expiredConnections.size() >= MAX_POOL_SIZE) {
+            connectionPool.clear();
+            populateConnectionPool(connectionPool, dbConnection);
+            expiredConnections.clear();
+        } else {
+            // Andernfalls werden alle abgelaufenen Verbindungen aus der Verbindungsliste entfernt und geschlossen
+            for (Connection connection : expiredConnections) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                connectionPool.remove(connection);
+            }
+        } */
