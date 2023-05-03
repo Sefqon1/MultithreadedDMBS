@@ -8,6 +8,7 @@ import java.util.*;
 
 public class GenericDataAccessObject {
     Connection dbconnection;
+    GenericEntryObject newObject;
     public GenericDataAccessObject(Connection connection) {
         this.dbconnection = connection;
     }

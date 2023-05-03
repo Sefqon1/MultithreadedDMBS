@@ -10,7 +10,7 @@ public class DatabaseConnectionPool {
     private static final int MAX_POOL_SIZE = 10;
     private static final long DELAY = 6000; // Zeitintervall für die Überprüfung von Verbindungen
     private static final long TIMEOUT = 6000; // Zeitintervall, nachdem eine Verbindung als "abgelaufen" gilt
-    private List<Connection> connectionPool; // Liste der Verbindungen zur Datenbank
+    private static List<Connection> connectionPool; // Liste der Verbindungen zur Datenbank
     private ScheduledExecutorService executorService; // ScheduledExecutorService für die periodische Überprüfung von Verbindungen
 
     //Nimmt DBConnection als Argument für Dependency Injection
@@ -78,11 +78,11 @@ public class DatabaseConnectionPool {
 
 
     // Diese Methode gibt eine Verbindung zurück in den Pool
-    public synchronized void releaseConnection(Connection connection) {
+    public static synchronized void releaseConnection(Connection connection) {
         // Hier wird die Verbindung in die Verbindungsliste zurückgegeben
         connectionPool.add(connection);
         // Hier werden alle Threads benachrichtigt, die auf eine Verbindung warten
-        notifyAll();
+        connectionPool.notifyAll();
     }
 }
 
