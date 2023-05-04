@@ -2,8 +2,8 @@ package akad.multithreadeddbms.model.domainmodels;
 
 public abstract class GenericEntryObject {
 
+    public String name;
     int id;
-    String name;
 
     public GenericEntryObject(String name) {
         this.name = name;

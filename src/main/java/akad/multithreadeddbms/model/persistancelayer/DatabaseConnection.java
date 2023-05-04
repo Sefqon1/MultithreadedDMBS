@@ -19,6 +19,7 @@ public class DatabaseConnection {
             connection = DriverManager.getConnection(url);
         } catch (SQLException | ClassNotFoundException ex) {
             // Hier wird eine RuntimeException ausgelöst, wenn eine Verbindung nicht hergestellt werden kann
+            System.out.println("Verbindung nicht hergestellt");
             throw new RuntimeException(ex);
         }
     }

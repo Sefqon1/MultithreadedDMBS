@@ -6,7 +6,9 @@ import java.sql.SQLException;
 public class PersistanceLayerTests {
 
     public static void main(String[] args) throws SQLException {
+        System.out.println("Starting Test");
         testGetDatabaseConnection();
+
     }
 
     private static void testGetDatabaseConnection() throws SQLException {
@@ -20,6 +22,8 @@ public class PersistanceLayerTests {
             System.exit(1);
         }
         conn.close();
+        System.out.println("Test finished");
+
     }
 }
 

@@ -7,13 +7,13 @@ import java.sql.*;
 import java.util.*;
 
 public class GenericDataAccessObject {
-    Connection dbconnection;
+    Connection connection;
     GenericEntryObject newObject;
     public GenericDataAccessObject(Connection connection) {
-        this.dbconnection = connection;
+        this.connection = connection;
     }
 
-    public void insertObject(GenericEntryObject genericObject) throws SQLException {
+    /*public void insertObject(GenericEntryObject genericObject) throws SQLException {
         String query = "INSERT INTO genericobject (name, class) VALUES (?, ?)";
         PreparedStatement statement = dbconnection.prepareStatement(query);
 
@@ -46,7 +46,7 @@ public class GenericDataAccessObject {
     public GenericEntryObject retrieveByName(String name) throws SQLException {
         String query = "SELECT * FROM EduDB WHERE name = ?";
         PreparedStatement statement = dbconnection.prepareStatement(query);
-        statement.setInt(1, name);
+        statement.setInt(1, Integer.parseInt(name));
         ResultSet resultSet = statement.executeQuery();
         int retrievedId = resultSet.getInt("id");
 
@@ -60,5 +60,5 @@ public class GenericDataAccessObject {
         DatabaseConnectionPool.releaseConnection(dbconnection);
 
         return genericObject;
-    }
+    } */
 }

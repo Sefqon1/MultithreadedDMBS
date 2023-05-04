@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 
 
 public class ThreadPool {
-    private List<Thread> threadPool;
+    private final List<Thread> threadPool;
     private static final int MAX_POOL_SIZE = 10;
 
     public ThreadPool() {
@@ -22,7 +22,7 @@ public class ThreadPool {
         }
     }
 
-    public Thread getThreadFromPool() {
+    public Thread getThreadFromPool() throws InterruptedException {
         while (threadPool.isEmpty()) {
             wait();
         }
