@@ -2,15 +2,15 @@ package akad.multithreadeddbms.model.domainmodels;
 
 public class TeacherEntryObject extends GenericEntryObject {
 
-    String courseName;
+    String subject;
 
-    public TeacherEntryObject(String name, String courseName) {
+    public TeacherEntryObject(String name, String subject) {
         super(name);
-        this.courseName = courseName;
+        this.subject = subject;
     }
 
-    public String getCourseName() { return courseName; }
-    public void setCourseName(String courseName) { this.courseName = courseName; }
+    public String getSubject() { return subject; }
+    public void setCourseName(String subject) { this.subject = subject; }
 
 
 }

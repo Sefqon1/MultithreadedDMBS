@@ -1,10 +1,8 @@
 package akad.multithreadeddbms.model.dataaccesslayer;
 
 import akad.multithreadeddbms.model.domainmodels.*;
-import akad.multithreadeddbms.model.persistancelayer.DatabaseConnectionPool;
 
 import java.sql.*;
-import java.util.*;
 
 public class GenericDataAccessObject {
     Connection connection;

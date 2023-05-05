@@ -1,9 +1,6 @@
-package akad.multithreadeddbms.model.persistancelayer;
+package akad.multithreadeddbms.model.persistencelayer;
 
-import java.sql.*;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 
 public class ThreadPool {

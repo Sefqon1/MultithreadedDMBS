@@ -1,10 +1,9 @@
 package akad.multithreadeddbms.model.dataaccesslayer;
 
 import akad.multithreadeddbms.model.domainmodels.*;
-import akad.multithreadeddbms.model.persistancelayer.DatabaseConnectionPool;
+import akad.multithreadeddbms.model.persistencelayer.DatabaseConnectionPool;
 
 import java.sql.*;
-import java.util.*;
 
 public class TeacherDAO extends GenericDataAccessObject {
 
@@ -21,19 +20,37 @@ public class TeacherDAO extends GenericDataAccessObject {
         validateConnection(newConnection); */
     }
 
-    public Runnable insertTeacher(TeacherEntryObject newTeacherObject) {
-        return () -> {
+    /*Getters and Setters*/
+    public synchronized void setInsertedTeacher(TeacherEntryObject teacher) {
+        this.insertedTeacher = teacher;
+    }
+
+    public synchronized TeacherEntryObject getInsertedTeacher() {
+        return this.insertedTeacher;
+    }
+
+    public synchronized void setRetrievedTeacher(TeacherEntryObject teacher) {
+        this.retrievedTeacher = teacher;
+    }
+
+    public synchronized TeacherEntryObject getRetrievedTeacher() {
+        return this.retrievedTeacher;
+    }
+
+    /*Db actions*/
+
+    public void insertTeacher(TeacherEntryObject newTeacherObject) {
             try {
-                this.insertedTeacher = newTeacherObject;
-                String query = "INSERT INTO teacher (name, course_name) VALUES (?, ?)";
+                setInsertedTeacher(newTeacherObject);
+                String query = "INSERT INTO Teacher (name, subject) VALUES (?, ?)";
                 PreparedStatement statement = connection.prepareStatement(query);
 
                 String name = insertedTeacher.getName();
-                String courseName = insertedTeacher.getCourseName();
-
+                String subject = insertedTeacher.getSubject();
+                System.out.println(name + " " + subject);
 
                 statement.setString(1, name);
-                statement.setString(2, courseName);
+                statement.setString(2, subject);
                 statement.executeUpdate();
                 statement.close();
             } catch (SQLException ex) {
@@ -41,22 +58,21 @@ public class TeacherDAO extends GenericDataAccessObject {
             } finally {
                 DatabaseConnectionPool.releaseConnection(connection);
             }
-        };
-    }
+        }
 
     public Runnable retrieveTeacherById(int id) {
         return () -> {
             try {
-                String query = "SELECT * FROM teacher WHERE id = ?";
+                String query = "SELECT * FROM Teacher WHERE id = ?";
                 PreparedStatement statement = connection.prepareStatement(query);
                 statement.setInt(1, id);
                 ResultSet resultSet = statement.executeQuery();
                 String retrievedName = resultSet.getString("name");
-                String retrievedCourseName = resultSet.getString("course_name");
+                String retrievedSubject = resultSet.getString("subject");
                 resultSet.close();
                 statement.close();
 
-                retrievedTeacher = new TeacherEntryObject(retrievedName, retrievedCourseName);
+                setRetrievedTeacher(new TeacherEntryObject(retrievedName, retrievedSubject));
 
             } catch (SQLException ex) {
                 ex.printStackTrace();
@@ -69,16 +85,16 @@ public class TeacherDAO extends GenericDataAccessObject {
     public Runnable retrieveTeacherByName(String name) {
         return () -> {
             try {
-                String query = "SELECT * FROM teacher WHERE name = ?";
+                String query = "SELECT * FROM Teacher WHERE name = ?";
                 PreparedStatement statement = connection.prepareStatement(query);
                 statement.setString(1, name);
                 ResultSet resultSet = statement.executeQuery();
                 int retrievedId = resultSet.getInt("id");
-                String retrievedCourseName = resultSet.getString("course_name");
+                String retrievedSubject = resultSet.getString("subject");
                 resultSet.close();
                 statement.close();
 
-                retrievedTeacher = new TeacherEntryObject(name, retrievedCourseName);
+                setRetrievedTeacher(new TeacherEntryObject(name, retrievedSubject));
 
             } catch (SQLException ex) {
                 ex.printStackTrace();
@@ -89,7 +105,4 @@ public class TeacherDAO extends GenericDataAccessObject {
     }
 }
 
-/* To Do:
-* Convert Methods into Runnable 
-* */
 

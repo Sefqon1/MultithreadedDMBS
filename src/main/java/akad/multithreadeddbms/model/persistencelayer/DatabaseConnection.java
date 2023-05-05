@@ -1,5 +1,5 @@
 // Import der notwendigen Java-SQL-Klassen
-package akad.multithreadeddbms.model.persistancelayer;
+package akad.multithreadeddbms.model.persistencelayer;
 import java.sql.*;
 
 public class DatabaseConnection {
@@ -11,7 +11,7 @@ public class DatabaseConnection {
     Connection connection;
 
     // Privater Konstruktor, um direkte Instanziierung zu verhindern
-    private DatabaseConnection() {
+    public DatabaseConnection() {
         try {
             // Hier wird der JDBC-Treiber registriert
             Class.forName("org.sqlite.JDBC");

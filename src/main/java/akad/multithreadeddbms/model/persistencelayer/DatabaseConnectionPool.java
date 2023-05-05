@@ -1,4 +1,4 @@
-package akad.multithreadeddbms.model.persistancelayer;
+package akad.multithreadeddbms.model.persistencelayer;
 
 import java.sql.*;
 import java.util.*;
@@ -20,7 +20,7 @@ public class DatabaseConnectionPool {
         populateConnectionPool(connectionPool, dbConnection);
         // ScheduledExecutorService für die periodische Überprüfung von Verbindungen
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MAX_POOL_SIZE);
-        executorService.scheduleAtFixedRate(() -> validateConnectionConnectionPool(dbConnection), DELAY, TIMEOUT, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(() -> validateConnectionPool(dbConnection), DELAY, TIMEOUT, TimeUnit.MILLISECONDS);
         // Hier wird die periodische Überprüfung von Verbindungen gestartet
     }
 
@@ -34,7 +34,7 @@ public class DatabaseConnectionPool {
         }
     }
 
-    private void validateConnectionConnectionPool(DatabaseConnection dbConnection) {
+    private void validateConnectionPool(DatabaseConnection dbConnection) {
         // Hier werden alle Verbindungen in der Verbindungsliste überprüft
         for (Connection connection : connectionPool) {
             try {
@@ -97,7 +97,7 @@ public class DatabaseConnectionPool {
         // Hier wird die Verbindung in die Verbindungsliste zurückgegeben
         connectionPool.add(connection);
         // Hier werden alle Threads benachrichtigt, die auf eine Verbindung warten
-        connectionPool.notifyAll();
+        //connectionPool.notifyAll();
     }
 }
 
