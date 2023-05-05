@@ -4,7 +4,8 @@ module akad.multithreadeddbms {
             
         requires org.controlsfx.controls;
             requires com.dlsc.formsfx;
-                        
+    requires java.sql;
+
     opens akad.multithreadeddbms to javafx.fxml;
     exports akad.multithreadeddbms;
 }
