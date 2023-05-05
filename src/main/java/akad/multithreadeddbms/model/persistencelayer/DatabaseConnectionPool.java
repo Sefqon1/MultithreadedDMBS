@@ -77,6 +77,7 @@ public class DatabaseConnectionPool {
 
     // Diese Methode gibt eine Verbindung zur Datenbank aus dem Pool zurück
     public synchronized Connection getConnectionFromPool() throws SQLException {
+        // Hier wird gewartet, bis eine Verbindung verfügbar wird
         while (connectionPool.isEmpty()) {
             try {
                 // Hier wird gewartet, bis eine Verbindung verfügbar wird

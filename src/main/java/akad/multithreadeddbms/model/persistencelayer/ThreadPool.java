@@ -19,6 +19,10 @@ public class ThreadPool {
         }
     }
 
+    public synchronized void stopThreadPool() {
+        for (Thread t : threadPool) t.interrupt();
+    }
+
     public Thread getThreadFromPool() throws InterruptedException {
         while (threadPool.isEmpty()) {
             wait();
