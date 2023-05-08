@@ -60,49 +60,51 @@ public class TeacherDAO extends GenericDataAccessObject {
             }
         }
 
-    public Runnable retrieveTeacherById(int id) {
-        return () -> {
-            try {
-                String query = "SELECT * FROM Teacher WHERE id = ?";
-                PreparedStatement statement = connection.prepareStatement(query);
-                statement.setInt(1, id);
-                ResultSet resultSet = statement.executeQuery();
-                String retrievedName = resultSet.getString("name");
-                String retrievedSubject = resultSet.getString("subject");
-                resultSet.close();
-                statement.close();
+    public TeacherEntryObject retrieveTeacherById(int id) {
+        try {
+            String query = "SELECT * FROM Teacher WHERE id = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            String retrievedName = resultSet.getString("name");
+            String retrievedSubject = resultSet.getString("subject");
+            resultSet.close();
+            statement.close();
 
-                setRetrievedTeacher(new TeacherEntryObject(retrievedName, retrievedSubject));
+            setRetrievedTeacher(new TeacherEntryObject(retrievedName, retrievedSubject));
 
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            } finally {
-                DatabaseConnectionPool.releaseConnection(connection);
-            }
-        };
+            if (retrievedTeacher == null) { System.out.println("retrievedTeacher null in Try block");}
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            DatabaseConnectionPool.releaseConnection(connection);
+        }
+        if (retrievedTeacher == null) { System.out.println("retrievedTeacher null before return");}
+        return retrievedTeacher;
     }
 
-    public Runnable retrieveTeacherByName(String name) {
-        return () -> {
-            try {
-                String query = "SELECT * FROM Teacher WHERE name = ?";
-                PreparedStatement statement = connection.prepareStatement(query);
-                statement.setString(1, name);
-                ResultSet resultSet = statement.executeQuery();
-                int retrievedId = resultSet.getInt("id");
-                String retrievedSubject = resultSet.getString("subject");
-                resultSet.close();
-                statement.close();
+    public TeacherEntryObject retrieveTeacherByName(String name) {
+        try {
+            String query = "SELECT * FROM Teacher WHERE name = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, name);
+            ResultSet resultSet = statement.executeQuery();
+            int retrievedId = resultSet.getInt("id");
+            String retrievedSubject = resultSet.getString("subject");
+            resultSet.close();
+            statement.close();
 
-                setRetrievedTeacher(new TeacherEntryObject(name, retrievedSubject));
+            setRetrievedTeacher(new TeacherEntryObject(name, retrievedSubject));
 
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            } finally {
-                DatabaseConnectionPool.releaseConnection(connection);
-            }
-        };
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            DatabaseConnectionPool.releaseConnection(connection);
+        }
+        return retrievedTeacher;
     }
+
 }
 
 

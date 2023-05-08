@@ -17,10 +17,9 @@ public class QueryExecutor {
     
     static TeacherEntryObject newTeacherObject;
     
-    public static void insertTeacherIntoDatabase(TeacherEntryObject newTeacherObject) throws InterruptedException, SQLException {
+    public static void insertTeacherIntoDatabase(TeacherEntryObject newTeacherObject, Thread insertTeacherThread, Connection connection) throws InterruptedException, SQLException {
 
-        Thread insertTeacherThread = newThreadPool.getThreadFromPool();
-        TeacherDAO insertTeacherDao = new TeacherDAO(newDbPool.getConnectionFromPool());
+        TeacherDAO insertTeacherDao = new TeacherDAO(connection);
         try {
         insertTeacherThread = new Thread(() -> {
             insertTeacherDao.insertTeacher(newTeacherObject);
@@ -29,26 +28,53 @@ public class QueryExecutor {
         } finally {
                 newThreadPool.returnThreadToPool(insertTeacherThread);
             }
-
-        if (insertTeacherThread.isAlive()) {
-            System.out.println("Insert teacher thread is running.");
-        } else {
-            System.out.println("Insert teacher thread is not running.");
-        }
     }
 
 
-    
-    
-    public static void main(String[] args) throws SQLException, InterruptedException {
+    public static TeacherEntryObject retrieveTeacherById(int teacherId, Thread retrieveTeacherThread, Connection connection) throws InterruptedException, SQLException {
+
+        TeacherDAO retrieveTeacherDao = new TeacherDAO(connection);
+
+        try {
+            retrieveTeacherThread = new Thread(() -> {
+                retrieveTeacherDao.retrieveTeacherById(teacherId);
+            });
+            retrieveTeacherThread.start();
+            retrieveTeacherThread.join();
+        } finally {
+            newThreadPool.returnThreadToPool(retrieveTeacherThread);
+        }
+
+        return retrieveTeacherDao.getRetrievedTeacher();
+    }
+
+   public static TeacherEntryObject retrieveTeacherByName(String teacherName, Thread retrieveTeacherThread, Connection connection) throws InterruptedException, SQLException {
+
+        TeacherDAO retrieveTeacherDao = new TeacherDAO(connection);
+
+        try {
+            retrieveTeacherThread = new Thread(() -> {
+                retrieveTeacherDao.retrieveTeacherByName(teacherName);
+            });
+            retrieveTeacherThread.start();
+            retrieveTeacherThread.join();
+        } finally {
+            newThreadPool.returnThreadToPool(retrieveTeacherThread);
+        }
+
+        return retrieveTeacherDao.getRetrievedTeacher();
+    }
+
+   /* public static void main(String[] args) throws SQLException, InterruptedException {
         newThreadPool = new ThreadPool();
         newDbConnection = new DatabaseConnection();
         newDbPool = new DatabaseConnectionPool(newDbConnection);
-        newTeacherObject = new TeacherEntryObject("Peter Zwegat Test!!", "Mathematik");
-        insertTeacherIntoDatabase(newTeacherObject);
-        
-        
-    }
+        //newTeacherObject = new TeacherEntryObject("Peter Zwegat Test!!", "Mathematik");
+        //insertTeacherIntoDatabase(newTeacherObject, newThreadPool.getThreadFromPool(), newDbPool.getConnectionFromPool());
+
+        TeacherEntryObject teacher = retrieveTeacherById(2, newThreadPool.getThreadFromPool(), newDbPool.getConnectionFromPool());
+        System.out.println(teacher.getName() + " " + teacher.getSubject());
+    } */
 
 
 }
