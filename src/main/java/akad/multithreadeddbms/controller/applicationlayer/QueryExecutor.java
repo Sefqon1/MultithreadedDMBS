@@ -1,23 +1,21 @@
 package akad.multithreadeddbms.controller.applicationlayer;
 
+import akad.multithreadeddbms.MainView;
 import akad.multithreadeddbms.model.dataaccesslayer.TeacherDAO;
 import akad.multithreadeddbms.model.domainmodels.TeacherEntryObject;
-import akad.multithreadeddbms.model.persistencelayer.DatabaseConnection;
-import akad.multithreadeddbms.model.persistencelayer.DatabaseConnectionPool;
-import akad.multithreadeddbms.model.persistencelayer.ThreadPool;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 public class QueryExecutor {
 
-    static ThreadPool newThreadPool;
-    static DatabaseConnection newDbConnection;
-    static DatabaseConnectionPool newDbPool;
+    //static ThreadPool newThreadPool;
+    //static DatabaseConnection newDbConnection;
+    //static DatabaseConnectionPool newDbPool;
     
-    static TeacherEntryObject newTeacherObject;
+    //static TeacherEntryObject newTeacherObject;
     
-    public static void insertTeacherIntoDatabase(TeacherEntryObject newTeacherObject, Thread insertTeacherThread, Connection connection) throws InterruptedException, SQLException {
+    public static boolean insertTeacherIntoDatabase(TeacherEntryObject newTeacherObject, Thread insertTeacherThread, Connection connection) throws InterruptedException, SQLException {
 
         TeacherDAO insertTeacherDao = new TeacherDAO(connection);
         try {
@@ -25,9 +23,12 @@ public class QueryExecutor {
             insertTeacherDao.insertTeacher(newTeacherObject);
         });
         insertTeacherThread.start();
+        insertTeacherThread.join();
         } finally {
-                newThreadPool.returnThreadToPool(insertTeacherThread);
-            }
+                MainView.getNewThreadPool().returnThreadToPool(insertTeacherThread);
+        }
+
+        return insertTeacherDao.getInsertionStatus();
     }
 
 
@@ -42,7 +43,7 @@ public class QueryExecutor {
             retrieveTeacherThread.start();
             retrieveTeacherThread.join();
         } finally {
-            newThreadPool.returnThreadToPool(retrieveTeacherThread);
+            MainView.getNewThreadPool().returnThreadToPool(retrieveTeacherThread);
         }
 
         return retrieveTeacherDao.getRetrievedTeacher();
@@ -59,7 +60,7 @@ public class QueryExecutor {
             retrieveTeacherThread.start();
             retrieveTeacherThread.join();
         } finally {
-            newThreadPool.returnThreadToPool(retrieveTeacherThread);
+            MainView.getNewThreadPool().returnThreadToPool(retrieveTeacherThread);
         }
 
         return retrieveTeacherDao.getRetrievedTeacher();

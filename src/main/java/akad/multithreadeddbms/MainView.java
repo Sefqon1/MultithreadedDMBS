@@ -2,6 +2,8 @@ package akad.multithreadeddbms;
 
 import akad.multithreadeddbms.controller.applicationlayer.InputHandler;
 import akad.multithreadeddbms.controller.applicationlayer.QueryExecutor;
+import akad.multithreadeddbms.model.dataaccesslayer.TeacherDAO;
+import akad.multithreadeddbms.model.domainmodels.TeacherEntryObject;
 import akad.multithreadeddbms.model.persistencelayer.DatabaseConnection;
 import akad.multithreadeddbms.model.persistencelayer.DatabaseConnectionPool;
 import akad.multithreadeddbms.model.persistencelayer.ThreadPool;
@@ -17,7 +19,7 @@ import javafx.stage.Stage;
 
 import java.sql.SQLException;
 
-public class HelloApplication extends Application {
+public class MainView extends Application {
 
     private TextField teacherField;
     private TextField courseField;
@@ -25,7 +27,7 @@ public class HelloApplication extends Application {
     private Label teacherResultLabel;
     private Label courseResultLabel;
 
-    static ThreadPool newThreadPool;
+    public static ThreadPool newThreadPool;
     static DatabaseConnection newDbConnection;
     static DatabaseConnectionPool newDbPool;
 
@@ -50,8 +52,23 @@ public class HelloApplication extends Application {
             String course = courseField.getText();
             if (InputHandler.validateInput(name, course)) {
                 try {
-                    QueryExecutor.insertTeacherIntoDatabase(InputHandler.convertInputToTeacherObject(name, course),
-                            newThreadPool.getThreadFromPool(), newDbPool.getConnectionFromPool());
+                    boolean success = QueryExecutor.insertTeacherIntoDatabase(InputHandler.convertInputToTeacherObject(name, course),
+                              newThreadPool.getThreadFromPool(),
+                              newDbPool.getConnectionFromPool());
+                    System.out.println("Success: " + success);
+                        if (success) {
+                            teacherField.clear();
+                            courseField.clear();
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Success");
+                            alert.setHeaderText("Teacher added to database");
+                            alert.showAndWait();
+                        } else {
+                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                            alert.setTitle("Error");
+                            alert.setHeaderText("Teacher not added to database");
+                            alert.showAndWait();
+                        }
                 } catch (InterruptedException | SQLException e) {
                     throw new RuntimeException(e);
                 }
@@ -75,14 +92,21 @@ public class HelloApplication extends Application {
         Label searchLabel = new Label("Search Database");
         searchField = new TextField();
         searchField.setPromptText("Search by id");
-
         Button searchButton = new Button("Search");
-        searchButton.setOnAction(event -> {
-            //executeSearchQuery()
-            String teacher = "Peter";
-            String course = "Physics";
 
-            teacherResultLabel.setText("Teacher: " + teacher);
+
+        searchButton.setOnAction(event -> {
+            TeacherEntryObject teacher;
+            int id = Integer.parseInt(searchField.getText());
+            try {
+                teacher = QueryExecutor.retrieveTeacherById(id, newThreadPool.getThreadFromPool(), newDbPool.getConnectionFromPool());
+            } catch (InterruptedException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+            String name = teacher.getName();
+            String course = teacher.getCourse();
+
+            teacherResultLabel.setText("Teacher: " + name);
             courseResultLabel.setText("Course: " + course);
         });
 
@@ -137,6 +161,10 @@ public class HelloApplication extends Application {
         primaryStage.setTitle("EduTrack Database");
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    public static ThreadPool getNewThreadPool() {
+        return newThreadPool;
     }
 
     public static void main(String[] args) throws SQLException {

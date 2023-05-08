@@ -9,15 +9,10 @@ public class TeacherDAO extends GenericDataAccessObject {
 
     private TeacherEntryObject insertedTeacher;
     private TeacherEntryObject retrievedTeacher;
+    private static boolean insertionStatus;
+
     public TeacherDAO(Connection connection){
         super(connection);
-
-        /* if (!DatabaseConnectionPool.validateConnection(this.connection)) {
-            this.connection = DatabaseConnectionPool.getConnectionFromPool(); }*/
-        /*
-        implement validation ->
-        validateObject(newStudentObject);
-        validateConnection(newConnection); */
     }
 
     /*Getters and Setters*/
@@ -39,26 +34,33 @@ public class TeacherDAO extends GenericDataAccessObject {
 
     /*Db actions*/
 
+    public boolean getInsertionStatus() {
+        return insertionStatus;
+    }
+
     public void insertTeacher(TeacherEntryObject newTeacherObject) {
+        insertionStatus = false;
             try {
                 setInsertedTeacher(newTeacherObject);
                 String query = "INSERT INTO Teacher (name, subject) VALUES (?, ?)";
                 PreparedStatement statement = connection.prepareStatement(query);
 
                 String name = insertedTeacher.getName();
-                String subject = insertedTeacher.getSubject();
-                System.out.println(name + " " + subject);
-
+                String course = insertedTeacher.getCourse();
                 statement.setString(1, name);
-                statement.setString(2, subject);
-                statement.executeUpdate();
+                statement.setString(2, course);
+                int rowsInserted = statement.executeUpdate();
+                if (rowsInserted > 0) {
+                    insertionStatus = true;
+                }
                 statement.close();
             } catch (SQLException ex) {
                 ex.printStackTrace();
             } finally {
                 DatabaseConnectionPool.releaseConnection(connection);
             }
-        }
+        System.out.println("Insertion status DAO: " + insertionStatus);
+    }
 
     public TeacherEntryObject retrieveTeacherById(int id) {
         try {
