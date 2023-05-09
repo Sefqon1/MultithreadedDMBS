@@ -1,6 +1,7 @@
 package akad.multithreadeddbms;
 
 import akad.multithreadeddbms.controller.applicationlayer.InputHandler;
+import akad.multithreadeddbms.controller.applicationlayer.OutputHandler;
 import akad.multithreadeddbms.controller.applicationlayer.QueryExecutor;
 import akad.multithreadeddbms.model.dataaccesslayer.TeacherDAO;
 import akad.multithreadeddbms.model.domainmodels.TeacherEntryObject;
@@ -97,7 +98,14 @@ public class MainView extends Application {
 
         searchButton.setOnAction(event -> {
             TeacherEntryObject teacher;
-            int id = Integer.parseInt(searchField.getText());
+            int id = OutputHandler.parseAndValidateQuery(searchField.getText());
+            if (id == -1) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Invalid input");
+                alert.showAndWait();
+                return;
+            }
             try {
                 teacher = QueryExecutor.retrieveTeacherById(id, newThreadPool.getThreadFromPool(), newDbPool.getConnectionFromPool());
             } catch (InterruptedException | SQLException e) {
@@ -123,18 +131,54 @@ public class MainView extends Application {
                 Insets(20));
         searchSection.setStyle("-fx-border-color: #ccc; -fx-border-radius: 5px;");
 
-        // Execute Both button
+
         Button executeBothButton = new Button("Execute Both");
-        /*executeBothButton.setOnAction(event -> {
-            boolean isAddValid = validateInput();
-            boolean isSearchValid = validateSearchInput();
-            if (isAddValid) {
-                executeQuery();
+        executeBothButton.setOnAction(event -> {
+            String name = teacherField.getText();
+            String course = courseField.getText();
+            if (InputHandler.validateInput(name, course)) {
+                try {
+                    boolean success = QueryExecutor.insertTeacherIntoDatabase(InputHandler.convertInputToTeacherObject(name, course),
+                            newThreadPool.getThreadFromPool(),
+                            newDbPool.getConnectionFromPool());
+                    System.out.println("Success: " + success);
+                    if (success) {
+                        teacherField.clear();
+                        courseField.clear();
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Success");
+                        alert.setHeaderText("Teacher added to database");
+                        alert.showAndWait();
+                    } else {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("Teacher not added to database");
+                        alert.showAndWait();
+                    }
+                } catch (InterruptedException | SQLException e) {
+                    throw new RuntimeException(e);
+                }
             }
-            if (isSearchValid) {
-                executeSearchQuery();
+            TeacherEntryObject teacher;
+            int id = OutputHandler.parseAndValidateQuery(searchField.getText());
+            if (id == -1) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Invalid input");
+                alert.showAndWait();
+                return;
             }
-        });*/
+            try {
+                teacher = QueryExecutor.retrieveTeacherById(id, newThreadPool.getThreadFromPool(), newDbPool.getConnectionFromPool());
+            } catch (InterruptedException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+            String nameBoth = teacher.getName();
+            String courseBoth = teacher.getCourse();
+
+            teacherResultLabel.setText("Teacher: " + nameBoth);
+            courseResultLabel.setText("Course: " + courseBoth);
+        });
 
         HBox executeBothBox = new HBox(executeBothButton);
         executeBothBox.setAlignment(Pos.CENTER);
