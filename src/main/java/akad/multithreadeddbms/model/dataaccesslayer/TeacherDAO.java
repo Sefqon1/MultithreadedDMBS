@@ -33,7 +33,7 @@ public class TeacherDAO extends GenericDataAccessObject {
     }
 
     /*Db actions*/
-
+    //Die Methode insertTeacher() ist nicht thread-safe, da die Variable insertionStatus nicht synchronisiert ist.
     public boolean getInsertionStatus() {
         return insertionStatus;
     }

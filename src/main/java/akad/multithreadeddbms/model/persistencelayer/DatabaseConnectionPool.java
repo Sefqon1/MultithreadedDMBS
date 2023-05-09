@@ -24,6 +24,7 @@ public class DatabaseConnectionPool {
         // Hier wird die periodische Überprüfung von Verbindungen gestartet
     }
 
+    // Diese Methode erstellt Verbindungen zur Datenbank und fügt sie der Verbindungsliste hinzu
     private synchronized void populateConnectionPool(List<Connection> connectionPool, DatabaseConnection dbconnection){
         int connectionsAdded = 0;
 
@@ -52,6 +53,7 @@ public class DatabaseConnectionPool {
         }
     }
 
+    // Diese Methode überprüft, ob eine Verbindung zur Datenbank geschlossen ist oder nicht
     public static boolean validateConnection(Connection connection) {
         try {
             if (connection.isClosed() || !connectionHealthCheck(connection)) {
@@ -63,6 +65,7 @@ public class DatabaseConnectionPool {
         return true;
     }
 
+    // Diese Methode überprüft, ob eine Verbindung zur Datenbank besteht oder nicht
     private static boolean connectionHealthCheck(Connection connection) {
 
         try {
