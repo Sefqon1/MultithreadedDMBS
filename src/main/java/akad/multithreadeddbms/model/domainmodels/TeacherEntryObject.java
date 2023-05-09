@@ -9,7 +9,7 @@ public class TeacherEntryObject extends GenericEntryObject {
         this.subject = subject;
     }
 
-    public String getSubject() { return subject; }
+    public String getCourse() { return subject; }
     public void setCourseName(String subject) { this.subject = subject; }
 
 
