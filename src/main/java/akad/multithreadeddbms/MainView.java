@@ -204,6 +204,14 @@ public class MainView extends Application {
 
         primaryStage.setTitle("EduTrack Database");
         primaryStage.setScene(scene);
+        primaryStage.setOnCloseRequest(event -> {
+            try {
+                newThreadPool.stopThreadPool();
+                newDbPool.closeConnectionPool();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
         primaryStage.show();
     }
 

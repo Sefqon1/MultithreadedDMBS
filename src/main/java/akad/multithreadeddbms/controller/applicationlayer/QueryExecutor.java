@@ -9,12 +9,6 @@ import java.sql.SQLException;
 
 public class QueryExecutor {
 
-    //static ThreadPool newThreadPool;
-    //static DatabaseConnection newDbConnection;
-    //static DatabaseConnectionPool newDbPool;
-    
-    //static TeacherEntryObject newTeacherObject;
-    
     public static boolean insertTeacherIntoDatabase(TeacherEntryObject newTeacherObject, Thread insertTeacherThread, Connection connection) throws InterruptedException, SQLException {
 
         TeacherDAO insertTeacherDao = new TeacherDAO(connection);
@@ -65,17 +59,4 @@ public class QueryExecutor {
 
         return retrieveTeacherDao.getRetrievedTeacher();
     }
-
-   /* public static void main(String[] args) throws SQLException, InterruptedException {
-        newThreadPool = new ThreadPool();
-        newDbConnection = new DatabaseConnection();
-        newDbPool = new DatabaseConnectionPool(newDbConnection);
-        //newTeacherObject = new TeacherEntryObject("Peter Zwegat Test!!", "Mathematik");
-        //insertTeacherIntoDatabase(newTeacherObject, newThreadPool.getThreadFromPool(), newDbPool.getConnectionFromPool());
-
-        TeacherEntryObject teacher = retrieveTeacherById(2, newThreadPool.getThreadFromPool(), newDbPool.getConnectionFromPool());
-        System.out.println(teacher.getName() + " " + teacher.getSubject());
-    } */
-
-
 }
