@@ -28,6 +28,7 @@ public class ThreadPool {
 
     //Hier wird ein Thread aus dem Pool geholt
     public Thread getThreadFromPool() throws InterruptedException {
+
         while (threadPool.isEmpty()) {
             wait();
         }
@@ -37,14 +38,12 @@ public class ThreadPool {
     //Hier wird ein Thread zurück in den Pool gelegt
     public void returnThreadToPool(Thread thread) {
         threadPool.add(thread);
-        //notifyAll();
+        notifyAll();
     }
 
 }
 
 /*
-To Do:
-- Add try/catch block + error handling
 
 - Consider adding timer to threads to check for possible deadlocks
 

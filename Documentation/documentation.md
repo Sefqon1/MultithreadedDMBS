@@ -32,6 +32,8 @@ Die Multithreaded JavaFX DBMS-Anwendung ist eine kleine und leichte Java-Anwendu
 
 ### Persistence Layer
 
+
+
 ### DatabaseConnection - Klasse
 
 Die Klasse "DatabaseConnection" dient als Schnittstelle zur Datenbank. Im Folgenden sind einige Anweisungen aufgelistet, die bei der Arbeit mit dieser Klasse hilfreich sein können:
@@ -174,12 +176,9 @@ Erstelle ein neues Lehrer-Objekt mit Namen "Max Mustermann" und Kurs "Mathematik
 TeacherEntryObject teacher = new TeacherEntryObject("Max Mustermann", "Mathematik");
 ```
 
+Setze den Kurs des Lehrers auf "Physik"
 ``` Java
-
-```
-
-``` Java
-
+teacher.setCourseName("Physik");
 ```
 
 ### Data Access Layer

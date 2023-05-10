@@ -30,7 +30,7 @@ public class DatabaseConnectionPool {
 
         while(connectionsAdded < MAX_POOL_SIZE) {
             // Hier wird eine neue Verbindung zur Datenbank erstellt und der Verbindungsliste hinzugefügt
-            connectionPool.add(dbconnection.getDatabaseConnection());
+            connectionPool.add(DatabaseConnection.getDatabaseConnection());
             connectionsAdded++;
         }
     }
@@ -44,7 +44,7 @@ public class DatabaseConnectionPool {
                     connection.close();
                     connectionPool.remove(connection);
                     if (connectionPool.size() < MAX_POOL_SIZE) {
-                        connectionPool.add(dbConnection.getDatabaseConnection());
+                        connectionPool.add(DatabaseConnection.getDatabaseConnection());
                     }
                 }
             } catch (SQLException ex){
@@ -95,13 +95,23 @@ public class DatabaseConnectionPool {
         return connectionPool.remove(connectionPool.size() - 1);
     }
 
+    public static void closeConnectionPool() throws SQLException {
+        // Hier werden alle Verbindungen in der Verbindungsliste geschlossen
+        for (Connection connection : connectionPool) {
+            connection.close();
+        }
+    }
 
     // Diese Methode gibt eine Verbindung zurück in den Pool
     public static synchronized void releaseConnection(Connection connection) {
-        // Hier wird die Verbindung in die Verbindungsliste zurückgegeben
-        connectionPool.add(connection);
-        // Hier werden alle Threads benachrichtigt, die auf eine Verbindung warten
-        //connectionPool.notifyAll();
+
+        synchronized (connectionPool){
+            // Hier wird die Verbindung in die Verbindungsliste zurückgegeben
+            connectionPool.add(connection);
+            // Hier werden alle Threads benachrichtigt, die auf eine Verbindung warten
+            connectionPool.notifyAll();
+        }
+
     }
 }
 
