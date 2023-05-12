@@ -8,11 +8,11 @@ import static akad.multithreadeddbms.tests.DataAccessLayerTest.*;
 import static akad.multithreadeddbms.tests.ApplicationLayerTest.*;
 public class TestMain {
 
-    public static void main(String[] args) throws SQLException, InterruptedException {
+    public static void main(String[] args) throws SQLException, InterruptedException, ClassNotFoundException {
         System.out.println("Starting Test");
         boolean testDbConnTestResult = testGetDatabaseConnection();
         boolean testDbPoolTestResult = testDatabaseConnectionPool();
-        boolean testThreadPoolTestResult = testThreadPool();
+        boolean testAddTaskToPoolResult = testAddTaskToPool();
         boolean testTeacherEntryObjectResult = testTeacherEntryObject();
         boolean testGenericEntryObjectResult = testGenericEntryObject();
         boolean testTeacherDAOSetUpResult = testTeacherDAOSetUp();
@@ -28,7 +28,7 @@ public class TestMain {
 
         printTestResult("DbConnection Test", testDbConnTestResult);
         printTestResult("DbConnectionPool Test", testDbPoolTestResult);
-        printTestResult("Thread Pool Test", testThreadPoolTestResult);
+        printTestResult("AddTaskToPool Test", testAddTaskToPoolResult);
         printTestResult("TeacherEntryObject Test", testTeacherEntryObjectResult);
         printTestResult("GenericEntryObject Test", testGenericEntryObjectResult);
         printTestResult("TeacherDAO SetUp Test", testTeacherDAOSetUpResult);

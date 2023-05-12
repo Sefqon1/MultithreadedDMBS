@@ -9,54 +9,24 @@ import java.sql.SQLException;
 
 public class QueryExecutor {
 
-    public static boolean insertTeacherIntoDatabase(TeacherEntryObject newTeacherObject, Thread insertTeacherThread, Connection connection) throws InterruptedException, SQLException {
+    public static boolean insertTeacherIntoDatabase(TeacherEntryObject newTeacherObject, Connection connection) throws InterruptedException, SQLException {
 
         TeacherDAO insertTeacherDao = new TeacherDAO(connection);
-        try {
-        insertTeacherThread = new Thread(() -> {
-            insertTeacherDao.insertTeacher(newTeacherObject);
-        });
-        insertTeacherThread.start();
-        insertTeacherThread.join();
-        } finally {
-                MainView.getNewThreadPool().returnThreadToPool(insertTeacherThread);
-        }
-
+        insertTeacherDao.insertTeacher(newTeacherObject);
         return insertTeacherDao.getInsertionStatus();
     }
 
 
-    public static TeacherEntryObject retrieveTeacherById(int teacherId, Thread retrieveTeacherThread, Connection connection) throws InterruptedException, SQLException {
+    public static TeacherEntryObject retrieveTeacherById(int teacherId, Connection connection) throws InterruptedException, SQLException {
 
         TeacherDAO retrieveTeacherDao = new TeacherDAO(connection);
-
-        try {
-            retrieveTeacherThread = new Thread(() -> {
-                retrieveTeacherDao.retrieveTeacherById(teacherId);
-            });
-            retrieveTeacherThread.start();
-            retrieveTeacherThread.join();
-        } finally {
-            MainView.getNewThreadPool().returnThreadToPool(retrieveTeacherThread);
-        }
-
+        retrieveTeacherDao.retrieveTeacherById(teacherId);
         return retrieveTeacherDao.getRetrievedTeacher();
     }
 
    public static TeacherEntryObject retrieveTeacherByName(String teacherName, Thread retrieveTeacherThread, Connection connection) throws InterruptedException, SQLException {
 
         TeacherDAO retrieveTeacherDao = new TeacherDAO(connection);
-
-        try {
-            retrieveTeacherThread = new Thread(() -> {
-                retrieveTeacherDao.retrieveTeacherByName(teacherName);
-            });
-            retrieveTeacherThread.start();
-            retrieveTeacherThread.join();
-        } finally {
-            MainView.getNewThreadPool().returnThreadToPool(retrieveTeacherThread);
-        }
-
         return retrieveTeacherDao.getRetrievedTeacher();
     }
 }

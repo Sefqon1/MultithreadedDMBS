@@ -9,6 +9,7 @@ import akad.multithreadeddbms.model.persistencelayer.DatabaseConnection;
 import akad.multithreadeddbms.model.persistencelayer.DatabaseConnectionPool;
 import akad.multithreadeddbms.model.persistencelayer.ThreadPool;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -19,6 +20,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.sql.SQLException;
+import java.util.function.Consumer;
 
 public class MainView extends Application {
 
@@ -37,7 +39,6 @@ public class MainView extends Application {
         // UI header
         Label headerLabel = new Label("EduTrack Database");
         headerLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
-
         // Input section
         Label inputLabel = new Label("Add New Entry");
 
@@ -52,27 +53,29 @@ public class MainView extends Application {
             String name = teacherField.getText();
             String course = courseField.getText();
             if (InputHandler.validateInput(name, course)) {
-                try {
-                    boolean success = QueryExecutor.insertTeacherIntoDatabase(InputHandler.convertInputToTeacherObject(name, course),
-                              newThreadPool.getThreadFromPool(),
-                              newDbPool.getConnectionFromPool());
-                    System.out.println("Success: " + success);
-                        if (success) {
-                            teacherField.clear();
-                            courseField.clear();
-                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                            alert.setTitle("Success");
-                            alert.setHeaderText("Teacher added to database");
-                            alert.showAndWait();
-                        } else {
-                            Alert alert = new Alert(Alert.AlertType.ERROR);
-                            alert.setTitle("Error");
-                            alert.setHeaderText("Teacher not added to database");
-                            alert.showAndWait();
-                        }
-                } catch (InterruptedException | SQLException e) {
-                    throw new RuntimeException(e);
-                }
+                newThreadPool.addTaskToPool(() -> {
+                    boolean success;
+                    try {
+                        success = QueryExecutor.insertTeacherIntoDatabase(InputHandler.convertInputToTeacherObject(name, course),
+                                newDbPool.getConnectionFromPool());
+                    } catch (InterruptedException | SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    if (success) {
+                        teacherField.clear();
+                        courseField.clear();
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Success");
+                        alert.setHeaderText("Teacher added to database");
+                        alert.showAndWait();
+                    } else {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("Teacher not added to database");
+                        alert.showAndWait();
+                    }
+            });
             }
         });
 
@@ -97,7 +100,6 @@ public class MainView extends Application {
 
 
         searchButton.setOnAction(event -> {
-            TeacherEntryObject teacher;
             int id = OutputHandler.parseAndValidateQuery(searchField.getText());
             if (id == -1) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -106,16 +108,24 @@ public class MainView extends Application {
                 alert.showAndWait();
                 return;
             }
-            try {
-                teacher = QueryExecutor.retrieveTeacherById(id, newThreadPool.getThreadFromPool(), newDbPool.getConnectionFromPool());
-            } catch (InterruptedException | SQLException e) {
-                throw new RuntimeException(e);
-            }
-            String name = teacher.getName();
-            String course = teacher.getCourse();
 
-            teacherResultLabel.setText("Teacher: " + name);
-            courseResultLabel.setText("Course: " + course);
+            Consumer<TeacherEntryObject> callback = (teacher) -> {
+                String name = teacher.getName();
+                String course = teacher.getCourse();
+
+                teacherResultLabel.setText("Teacher: " + name);
+                courseResultLabel.setText("Course: " + course);
+            };
+            newThreadPool.addTaskToPool(() -> {
+                try {
+                    TeacherEntryObject teacher = QueryExecutor.retrieveTeacherById(id, newDbPool.getConnectionFromPool());
+                    Platform.runLater(() -> callback.accept(teacher));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         });
 
 
@@ -137,11 +147,15 @@ public class MainView extends Application {
             String name = teacherField.getText();
             String course = courseField.getText();
             if (InputHandler.validateInput(name, course)) {
-                try {
-                    boolean success = QueryExecutor.insertTeacherIntoDatabase(InputHandler.convertInputToTeacherObject(name, course),
-                            newThreadPool.getThreadFromPool(),
-                            newDbPool.getConnectionFromPool());
-                    System.out.println("Success: " + success);
+                newThreadPool.addTaskToPool(() -> {
+                    boolean success;
+                    try {
+                        success = QueryExecutor.insertTeacherIntoDatabase(InputHandler.convertInputToTeacherObject(name, course),
+                                newDbPool.getConnectionFromPool());
+                    } catch (InterruptedException | SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+
                     if (success) {
                         teacherField.clear();
                         courseField.clear();
@@ -155,11 +169,9 @@ public class MainView extends Application {
                         alert.setHeaderText("Teacher not added to database");
                         alert.showAndWait();
                     }
-                } catch (InterruptedException | SQLException e) {
-                    throw new RuntimeException(e);
-                }
+                });
             }
-            TeacherEntryObject teacher;
+
             int id = OutputHandler.parseAndValidateQuery(searchField.getText());
             if (id == -1) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -168,16 +180,23 @@ public class MainView extends Application {
                 alert.showAndWait();
                 return;
             }
-            try {
-                teacher = QueryExecutor.retrieveTeacherById(id, newThreadPool.getThreadFromPool(), newDbPool.getConnectionFromPool());
-            } catch (InterruptedException | SQLException e) {
-                throw new RuntimeException(e);
-            }
-            String nameBoth = teacher.getName();
-            String courseBoth = teacher.getCourse();
+            Consumer<TeacherEntryObject> callback = (teacher) -> {
+                String bothName = teacher.getName();
+                String bothCourse = teacher.getCourse();
 
-            teacherResultLabel.setText("Teacher: " + nameBoth);
-            courseResultLabel.setText("Course: " + courseBoth);
+                teacherResultLabel.setText("Teacher: " + name);
+                courseResultLabel.setText("Course: " + course);
+            };
+            newThreadPool.addTaskToPool(() -> {
+                try {
+                    TeacherEntryObject teacher = QueryExecutor.retrieveTeacherById(id, newDbPool.getConnectionFromPool());
+                    Platform.runLater(() -> callback.accept(teacher));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         });
 
         HBox executeBothBox = new HBox(executeBothButton);
@@ -211,7 +230,7 @@ public class MainView extends Application {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-        }
+        });
         primaryStage.show();
     }
 
@@ -219,7 +238,7 @@ public class MainView extends Application {
         return newThreadPool;
     }
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, ClassNotFoundException {
         newThreadPool = new ThreadPool();
         newDbConnection = new DatabaseConnection();
         newDbPool = new DatabaseConnectionPool(newDbConnection);

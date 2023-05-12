@@ -7,14 +7,14 @@ import java.sql.Connection;
 
 public class DataAccessLayerTest {
 
-    public static boolean testTeacherDAOSetUp() {
+    public static boolean testTeacherDAOSetUp() throws ClassNotFoundException {
         Connection connection = DatabaseConnection.getDatabaseConnection();
         TeacherDAO testDAO = new TeacherDAO(connection);
 
         return testDAO != null;
     }
 
-    public static boolean testTeacherDAOInsertion() {
+    public static boolean testTeacherDAOInsertion() throws ClassNotFoundException {
         Connection connection = DatabaseConnection.getDatabaseConnection();
         TeacherDAO testDAO = new TeacherDAO(connection);
         TeacherEntryObject newTeacher = new TeacherEntryObject("Test Teacher", "Test Course");
@@ -22,21 +22,21 @@ public class DataAccessLayerTest {
         return testDAO.getInsertionStatus();
     }
 
-    public static boolean testTeacherDAOGetTeacherById() {
+    public static boolean testTeacherDAOGetTeacherById() throws ClassNotFoundException {
         Connection connection = DatabaseConnection.getDatabaseConnection();
         TeacherDAO testDAO = new TeacherDAO(connection);
         TeacherEntryObject retrievedTeacher = testDAO.retrieveTeacherById(1);
         return retrievedTeacher != null;
     }
 
-    public static boolean testTeacherDAOGetTeacherByName() {
+    public static boolean testTeacherDAOGetTeacherByName() throws ClassNotFoundException {
         Connection connection = DatabaseConnection.getDatabaseConnection();
         TeacherDAO testDAO = new TeacherDAO(connection);
         TeacherEntryObject retrievedTeacher = testDAO.retrieveTeacherByName("Morgan");
         return retrievedTeacher != null;
     }
 
-    public static boolean testGenericDAOSetUp() {
+    public static boolean testGenericDAOSetUp() throws ClassNotFoundException {
         Connection connection = DatabaseConnection.getDatabaseConnection();
         TeacherDAO testDAO = new TeacherDAO(connection);
         return testDAO != null;
