@@ -227,7 +227,7 @@ public class MainView extends Application {
             try {
                 newThreadPool.stopThreadPool();
                 newDbPool.closeConnectionPool();
-            } catch (SQLException e) {
+            } catch (SQLException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
         });

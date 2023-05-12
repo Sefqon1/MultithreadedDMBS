@@ -33,23 +33,24 @@ public class ThreadPool {
     }
 
     //Hier wird der Thread pool gestoppt
-    public synchronized void stopThreadPool() {
+    public synchronized void stopThreadPool() throws InterruptedException {
+        for (Thread t : threadPool) {
+            ((WorkerThread) t).stopThread();
+        }
         for (Thread t : threadPool) t.interrupt();
+        for (Thread t : threadPool) t.join();
+
     }
 
     public void addTaskToPool(Runnable task) {
         taskQueue.add(task);
     }
 
-    //Hier wird ein Thread zurück in den Pool gelegt
-    public void returnThreadToPool(Thread thread) {
-        threadPool.add(thread);
-        notifyAll();
-    }
 
     //WorkerThread, der die übergebenen Tasks ausführt
     private static class WorkerThread extends Thread {
         private final BlockingQueue<Runnable> taskQueue;
+        private volatile boolean stopRequested = false;
 
         public WorkerThread(BlockingQueue<Runnable> taskQueue) {
             this.taskQueue = taskQueue;
@@ -57,7 +58,7 @@ public class ThreadPool {
 
         @Override
         public void run() {
-            while (!Thread.currentThread().isInterrupted()) {
+            while (!stopRequested && !Thread.currentThread().isInterrupted()) {
                 try {
                     Runnable task = taskQueue.take();
                     task.run();
@@ -66,13 +67,12 @@ public class ThreadPool {
                 }
             }
         }
+
+        public void stopThread() {
+            stopRequested = true;
+        }
     }
 
 }
 
-/*
-
-- Consider adding timer to threads to check for possible deadlocks
-
-*/
 
