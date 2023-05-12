@@ -3,7 +3,6 @@ package akad.multithreadeddbms.model.domainmodels;
 public class GenericEntryObject {
 
     public String name;
-    int id;
 
     //Hier wird ein neues Objekt erstellt
     public GenericEntryObject(String name) {

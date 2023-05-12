@@ -12,6 +12,7 @@ public class DatabaseConnection {
 
     // Privater Konstruktor, um direkte Instanziierung zu verhindern
     public DatabaseConnection() {
+
         try {
             // Hier wird der JDBC-Treiber registriert
             Class.forName("org.sqlite.JDBC");
@@ -19,7 +20,6 @@ public class DatabaseConnection {
             connection = DriverManager.getConnection(url);
         } catch (SQLException | ClassNotFoundException ex) {
             // Hier wird eine RuntimeException ausgelöst, wenn eine Verbindung nicht hergestellt werden kann
-            System.out.println("Verbindung nicht hergestellt");
             throw new RuntimeException(ex);
         }
     }

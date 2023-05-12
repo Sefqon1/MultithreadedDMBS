@@ -13,19 +13,25 @@ public class DatabaseConnectionPool {
     private static List<Connection> connectionPool; // Liste der Verbindungen zur Datenbank
 
     //Nimmt DBConnection als Argument für Dependency Injection
-    public DatabaseConnectionPool(DatabaseConnection dbConnection) throws SQLException {
+    public DatabaseConnectionPool(DatabaseConnection dbConnection) throws SQLException, ClassNotFoundException {
 
         connectionPool = new ArrayList<>(MAX_POOL_SIZE);
         // Hier werden die Verbindungen zur Datenbank erstellt und der Verbindungsliste hinzugefügt
         populateConnectionPool(connectionPool, dbConnection);
         // ScheduledExecutorService für die periodische Überprüfung von Verbindungen
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MAX_POOL_SIZE);
-        executorService.scheduleAtFixedRate(() -> validateConnectionPool(dbConnection), DELAY, TIMEOUT, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(() -> {
+            try {
+                validateConnectionPool(dbConnection);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }, DELAY, TIMEOUT, TimeUnit.MILLISECONDS);
         // Hier wird die periodische Überprüfung von Verbindungen gestartet
     }
 
     // Diese Methode erstellt Verbindungen zur Datenbank und fügt sie der Verbindungsliste hinzu
-    private synchronized void populateConnectionPool(List<Connection> connectionPool, DatabaseConnection dbconnection){
+    private synchronized void populateConnectionPool(List<Connection> connectionPool, DatabaseConnection dbconnection) throws ClassNotFoundException {
         int connectionsAdded = 0;
 
         while(connectionsAdded < MAX_POOL_SIZE) {
@@ -35,7 +41,7 @@ public class DatabaseConnectionPool {
         }
     }
 
-    private void validateConnectionPool(DatabaseConnection dbConnection) {
+    private void validateConnectionPool(DatabaseConnection dbConnection) throws ClassNotFoundException {
         // Hier werden alle Verbindungen in der Verbindungsliste überprüft
         for (Connection connection : connectionPool) {
             try {
@@ -103,7 +109,7 @@ public class DatabaseConnectionPool {
     }
 
     // Diese Methode gibt eine Verbindung zurück in den Pool
-    public static synchronized void releaseConnection(Connection connection) {
+    public static void releaseConnection(Connection connection) {
 
         synchronized (connectionPool){
             // Hier wird die Verbindung in die Verbindungsliste zurückgegeben

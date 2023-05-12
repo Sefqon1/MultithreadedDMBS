@@ -6,11 +6,12 @@ import akad.multithreadeddbms.model.persistencelayer.ThreadPool;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Objects;
 
 public class PersistenceLayerTests {
 
 
-    public static boolean testGetDatabaseConnection() throws SQLException {
+    public static boolean testGetDatabaseConnection() throws SQLException, ClassNotFoundException {
         Connection conn = DatabaseConnection.getDatabaseConnection();
         if (conn == null) {
             System.err.println("getDatabaseConnection returned null");
@@ -24,7 +25,7 @@ public class PersistenceLayerTests {
         return true;
     }
 
-    public static boolean testDatabaseConnectionPool() throws SQLException {
+    public static boolean testDatabaseConnectionPool() throws SQLException, ClassNotFoundException {
         DatabaseConnection dbConnection = new DatabaseConnection();
         DatabaseConnectionPool dbPool = new DatabaseConnectionPool(dbConnection);
         int i = 0;
@@ -38,18 +39,14 @@ public class PersistenceLayerTests {
         return i == 10;
     }
 
+    public static boolean testAddTaskToPool() {
+        ThreadPool threadPool = new ThreadPool();
+        Runnable task = () -> {
+            // Do something
+        };
+        threadPool.addTaskToPool(task);
 
-    public static boolean testThreadPool() throws InterruptedException {
-        ThreadPool newPool = new ThreadPool();
-        int i = 0;
-        for (int j = 0; j < 10; j++) {
-            Thread newThread = newPool.getThreadFromPool();
-            if (newThread != null) {
-                i++;
-            }
-        }
-        return i == 10;
+        return threadPool.getTaskQueueSize() == 1;
     }
-
 }
 

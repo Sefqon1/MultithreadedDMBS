@@ -37,9 +37,12 @@ public class TeacherDAO extends GenericDataAccessObject {
     public boolean getInsertionStatus() {
         return insertionStatus;
     }
+    private void setInsertionStatus(boolean insertionStatus) {
+        this.insertionStatus = insertionStatus;
+    }
 
     public void insertTeacher(TeacherEntryObject newTeacherObject) {
-        insertionStatus = false;
+        boolean localInsertionStatus = false;
             try {
                 setInsertedTeacher(newTeacherObject);
                 String query = "INSERT INTO Teacher (name, subject) VALUES (?, ?)";
@@ -51,7 +54,7 @@ public class TeacherDAO extends GenericDataAccessObject {
                 statement.setString(2, course);
                 int rowsInserted = statement.executeUpdate();
                 if (rowsInserted > 0) {
-                    insertionStatus = true;
+                    localInsertionStatus = true;
                 }
                 statement.close();
             } catch (SQLException ex) {
@@ -59,7 +62,7 @@ public class TeacherDAO extends GenericDataAccessObject {
             } finally {
                 DatabaseConnectionPool.releaseConnection(connection);
             }
-        System.out.println("Insertion status DAO: " + insertionStatus);
+            setInsertionStatus(localInsertionStatus);
     }
 
     public TeacherEntryObject retrieveTeacherById(int id) {
@@ -75,14 +78,12 @@ public class TeacherDAO extends GenericDataAccessObject {
 
             setRetrievedTeacher(new TeacherEntryObject(retrievedName, retrievedSubject));
 
-            if (retrievedTeacher == null) { System.out.println("retrievedTeacher null in Try block");}
 
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             DatabaseConnectionPool.releaseConnection(connection);
         }
-        if (retrievedTeacher == null) { System.out.println("retrievedTeacher null before return");}
         return retrievedTeacher;
     }
 
