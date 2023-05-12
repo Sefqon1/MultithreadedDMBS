@@ -23,13 +23,14 @@ import java.sql.SQLException;
 import java.util.function.Consumer;
 
 public class MainView extends Application {
-
+    // UI elements
     private TextField teacherField;
     private TextField courseField;
     private TextField searchField;
     private Label teacherResultLabel;
     private Label courseResultLabel;
 
+    // Database elements
     public static ThreadPool newThreadPool;
     static DatabaseConnection newDbConnection;
     static DatabaseConnectionPool newDbPool;
@@ -48,14 +49,17 @@ public class MainView extends Application {
         courseField = new TextField();
         courseField.setPromptText("Course");
 
+        // Button um einen neuen Eintrag in die Datenbank zu schreiben
         Button addButton = new Button("Add");
         addButton.setOnAction(event -> {
             String name = teacherField.getText();
             String course = courseField.getText();
             if (InputHandler.validateInput(name, course)) {
+                // Gib die Aufgabe an den Threadpool weiter
                 newThreadPool.addTaskToPool(() -> {
                     boolean success;
                     try {
+                        // Führe die Aufgabe aus und gib das Ergebnis zurück (true/false)
                         success = QueryExecutor.insertTeacherIntoDatabase(InputHandler.convertInputToTeacherObject(name, course),
                                 newDbPool.getConnectionFromPool());
                     } catch (InterruptedException | SQLException e) {
@@ -98,7 +102,7 @@ public class MainView extends Application {
         searchField.setPromptText("Search by id");
         Button searchButton = new Button("Search");
 
-
+        // Button um einen Eintrag aus der Datenbank zu lesen
         searchButton.setOnAction(event -> {
             int id = OutputHandler.parseAndValidateQuery(searchField.getText());
             if (id == -1) {
@@ -109,6 +113,7 @@ public class MainView extends Application {
                 return;
             }
 
+            // Callback Funktion, die das Ergebnis der Datenbankabfrage verarbeitet
             Consumer<TeacherEntryObject> callback = (teacher) -> {
                 String name = teacher.getName();
                 String course = teacher.getCourse();
@@ -116,6 +121,7 @@ public class MainView extends Application {
                 teacherResultLabel.setText("Teacher: " + name);
                 courseResultLabel.setText("Course: " + course);
             };
+            // Gib die Aufgabe an den Threadpool weiter
             newThreadPool.addTaskToPool(() -> {
                 try {
                     TeacherEntryObject teacher = QueryExecutor.retrieveTeacherById(id, newDbPool.getConnectionFromPool());

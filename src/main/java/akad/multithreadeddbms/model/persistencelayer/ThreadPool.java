@@ -42,6 +42,7 @@ public class ThreadPool {
 
     }
 
+    // Hier wird ein Task der TaskQueue hinzugefügt
     public void addTaskToPool(Runnable task) {
         taskQueue.add(task);
     }
@@ -49,13 +50,16 @@ public class ThreadPool {
 
     //WorkerThread, der die übergebenen Tasks ausführt
     private static class WorkerThread extends Thread {
+        // Hier wird eine TaskQueue instanziiert
         private final BlockingQueue<Runnable> taskQueue;
+        // Hier wird ein Flag gesetzt, ob der Thread gestoppt werden soll
         private volatile boolean stopRequested = false;
 
         public WorkerThread(BlockingQueue<Runnable> taskQueue) {
             this.taskQueue = taskQueue;
         }
 
+        // Hier wird der Thread gestartet und die Tasks ausgeführt
         @Override
         public void run() {
             while (!stopRequested && !Thread.currentThread().isInterrupted()) {
@@ -68,6 +72,7 @@ public class ThreadPool {
             }
         }
 
+        // Hier wird der Thread gestoppt
         public void stopThread() {
             stopRequested = true;
         }
