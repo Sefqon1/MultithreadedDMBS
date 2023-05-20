@@ -5,12 +5,16 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class DatabaseConnectionPool {
     private static final int MAX_POOL_SIZE = 10; // Maximale Anzahl an Verbindungen zur Datenbank
-    private static final long DELAY = 6000; // Zeitintervall für die Überprüfung von Verbindungen
-    private static final long TIMEOUT = 6000; // Zeitintervall, nachdem eine Verbindung als "abgelaufen" gilt
+    private static final long DELAY = 5000; // Zeitintervall für die Überprüfung von Verbindungen
+    private static final long TIMEOUT = 30000; // Zeitintervall, nachdem eine Verbindung als "abgelaufen" gilt
     private static List<Connection> connectionPool; // Liste der Verbindungen zur Datenbank
+    private static final Lock lock = new ReentrantLock();
+    private static ScheduledExecutorService executorService; // ScheduledExecutorService für die periodische Überprüfung von Verbindungen
 
     //Nimmt DBConnection als Argument für Dependency Injection
     public DatabaseConnectionPool(DatabaseConnection dbConnection) throws SQLException, ClassNotFoundException {
@@ -19,7 +23,7 @@ public class DatabaseConnectionPool {
         // Hier werden die Verbindungen zur Datenbank erstellt und der Verbindungsliste hinzugefügt
         populateConnectionPool(connectionPool, dbConnection);
         // ScheduledExecutorService für die periodische Überprüfung von Verbindungen
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MAX_POOL_SIZE);
+        executorService = Executors.newScheduledThreadPool(MAX_POOL_SIZE);
         executorService.scheduleAtFixedRate(() -> {
             try {
                 validateConnectionPool(dbConnection);
@@ -90,25 +94,38 @@ public class DatabaseConnectionPool {
 
     // Diese Methode gibt eine Verbindung zur Datenbank aus dem Pool zurück
     public synchronized Connection getConnectionFromPool() throws SQLException {
-        // Hier wird gewartet, bis eine Verbindung verfügbar wird
-        while (connectionPool.isEmpty()) {
-            try {
-                // Hier wird gewartet, bis eine Verbindung verfügbar wird
-                wait();
-            } catch (InterruptedException e) {
-                // Hier wird die InterruptedException in eine SQLException umgewandelt
-                Thread.currentThread().interrupt();
-                throw new SQLException(e);
+        lock.lock();
+        try {
+            // Hier wird gewartet, bis eine Verbindung verfügbar wird
+            while (connectionPool.isEmpty()) {
+                try {
+                    // Hier wird gewartet, bis eine Verbindung verfügbar wird
+                    wait();
+                } catch (InterruptedException e) {
+                    // Hier wird die InterruptedException in eine SQLException umgewandelt
+                    Thread.currentThread().interrupt();
+                    throw new SQLException(e);
+                }
             }
+            // Hier wird die letzte Verbindung aus der Verbindungsliste entfernt und ausgegeben
+            return connectionPool.remove(connectionPool.size() - 1);
+        } finally {
+            lock.unlock();
         }
-        // Hier wird die letzte Verbindung aus der Verbindungsliste entfernt und ausgegeben
-        return connectionPool.remove(connectionPool.size() - 1);
     }
 
     // Diese Methode schließt alle Verbindungen zur Datenbank
     public static void closeConnectionPool() throws SQLException {
         for (Connection connection : connectionPool) {
             connection.close();
+        }
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(DELAY, TimeUnit.MILLISECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
         }
     }
 
