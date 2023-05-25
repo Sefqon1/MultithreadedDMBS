@@ -35,6 +35,9 @@ public class MainView extends Application {
     static DatabaseConnection newDbConnection;
     static DatabaseConnectionPool newDbPool;
 
+    // Refresh interval in milliseconds
+    private static final int REFRESH_INTERVAL = 1000;
+
     @Override
     public void start(Stage primaryStage) {
         // UI header

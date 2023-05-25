@@ -35,12 +35,12 @@ public class DatabaseConnectionPool {
     }
 
     // Diese Methode erstellt Verbindungen zur Datenbank und fügt sie der Verbindungsliste hinzu.
-    private synchronized void populateConnectionPool(List<Connection> connectionPool, DatabaseConnection dbconnection) throws ClassNotFoundException {
+    private synchronized void populateConnectionPool(List<Connection> connectionPool, DatabaseConnection dbConnection) throws ClassNotFoundException {
         int connectionsAdded = 0;
         // Hier wird gewartet, bis die maximale Anzahl an Verbindungen zur Datenbank erreicht wird
         while(connectionsAdded < MAX_POOL_SIZE) {
             // Hier wird eine neue Verbindung zur Datenbank erstellt und der Verbindungsliste hinzugefügt
-            connectionPool.add(DatabaseConnection.getDatabaseConnection());
+            connectionPool.add(dbConnection.getDatabaseConnection());
             connectionsAdded++;
         }
     }
@@ -138,7 +138,6 @@ public class DatabaseConnectionPool {
             // Hier werden alle Threads benachrichtigt, die auf eine Verbindung warten
             connectionPool.notifyAll();
         }
-
     }
 }
 
