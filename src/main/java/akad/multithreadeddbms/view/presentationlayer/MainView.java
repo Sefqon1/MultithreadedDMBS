@@ -1,4 +1,4 @@
-package akad.multithreadeddbms;
+package akad.multithreadeddbms.view.presentationlayer;
 
 import akad.multithreadeddbms.controller.applicationlayer.InputHandler;
 import akad.multithreadeddbms.controller.applicationlayer.OutputHandler;

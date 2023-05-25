@@ -1,6 +1,5 @@
 package akad.multithreadeddbms.controller.applicationlayer;
 
-import akad.multithreadeddbms.MainView;
 import akad.multithreadeddbms.model.dataaccesslayer.TeacherDAO;
 import akad.multithreadeddbms.model.domainmodels.TeacherEntryObject;
 

@@ -38,18 +38,6 @@
           <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>                    
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>${junit.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <version>${junit.version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.xerial</groupId>
@@ -67,7 +55,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>akad.multithreadeddbms.MainView</mainClass>
+              <mainClass>akad.multithreadeddbms.Main</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -90,7 +78,7 @@
             <!-- Default configuration for running with: mvn clean javafx:run -->
             <id>default-cli</id>
             <configuration>
-              <mainClass>akad.multithreadeddbms.MainView</mainClass>
+              <mainClass>akad.multithreadeddbms.Main</mainClass>
               <launcher>app</launcher>
               <jlinkZipName>app</jlinkZipName>
               <jlinkImageName>app</jlinkImageName>
@@ -104,3 +92,4 @@
     </plugins>
   </build>
 </project>
+
