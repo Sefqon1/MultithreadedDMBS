@@ -9,38 +9,34 @@ public class TeacherDAO extends GenericDataAccessObject {
 
     private TeacherEntryObject insertedTeacher;
     private TeacherEntryObject retrievedTeacher;
-    private static boolean insertionStatus;
+    private boolean insertionStatus;
 
     public TeacherDAO(Connection connection){
         super(connection);
     }
 
-    /*Getters and Setters*/
+    // Getters und Setter
     public synchronized void setInsertedTeacher(TeacherEntryObject teacher) {
         this.insertedTeacher = teacher;
     }
-
     public synchronized TeacherEntryObject getInsertedTeacher() {
         return this.insertedTeacher;
     }
-
     public synchronized void setRetrievedTeacher(TeacherEntryObject teacher) {
         this.retrievedTeacher = teacher;
     }
-
     public synchronized TeacherEntryObject getRetrievedTeacher() {
         return this.retrievedTeacher;
     }
-
-    /*Db actions*/
-    //Die Methode insertTeacher() ist nicht thread-safe, da die Variable insertionStatus nicht synchronisiert ist.
-    public boolean getInsertionStatus() {
+    public synchronized boolean getInsertionStatus() {
         return insertionStatus;
     }
-    private void setInsertionStatus(boolean insertionStatus) {
+    private synchronized void setInsertionStatus(boolean insertionStatus) {
         this.insertionStatus = insertionStatus;
     }
 
+    // Datenbankaktionen
+    // Hier wird ein neuer Lehrer in die Datenbank eingefügt
     public void insertTeacher(TeacherEntryObject newTeacherObject) {
         boolean localInsertionStatus = false;
             try {
@@ -65,6 +61,7 @@ public class TeacherDAO extends GenericDataAccessObject {
             setInsertionStatus(localInsertionStatus);
     }
 
+    // Hier wird ein Eintrag in der Datenbank mit der Id gesucht.
     public TeacherEntryObject retrieveTeacherById(int id) {
         try {
             String query = "SELECT * FROM Teacher WHERE id = ?";
@@ -87,6 +84,7 @@ public class TeacherDAO extends GenericDataAccessObject {
         return retrievedTeacher;
     }
 
+    // Hier wird ein Eintrag in der Datenbank mit dem Namen gesucht.
     public TeacherEntryObject retrieveTeacherByName(String name) {
         try {
             String query = "SELECT * FROM Teacher WHERE name = ?";

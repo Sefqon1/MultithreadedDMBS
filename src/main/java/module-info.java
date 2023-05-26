@@ -8,4 +8,6 @@ module akad.multithreadeddbms {
 
     opens akad.multithreadeddbms to javafx.fxml;
     exports akad.multithreadeddbms;
+    exports akad.multithreadeddbms.view.presentationlayer;
+    opens akad.multithreadeddbms.view.presentationlayer to javafx.fxml;
 }
